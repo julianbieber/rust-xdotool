@@ -41,10 +41,10 @@ use crate::run;
 /// ]);
 /// println!("{}", output.status);
 /// ```
-pub fn move_mouse(x: u16, y: u16, options: OptionVec<MouseMoveOption>) -> Output {
+pub fn move_mouse(x: u16, y: u16, options: OptionVec<MouseMoveOption>, display: u32) -> Output {
     let c = Command::Mouse(sub_commands::Mouse::MouseMove(options));
     let args = format!("{} {}", x, y);
-    run(c, &args)
+    run(c, &args, display)
 }
 
 /// Move the mouse x,y pixels relative to the current position of the mouse cursor.
@@ -68,10 +68,15 @@ pub fn move_mouse(x: u16, y: u16, options: OptionVec<MouseMoveOption>) -> Output
 /// println!("{}", String::from_utf8(output.stdout)?);
 /// # Ok::<(), std::string::FromUtf8Error>(())
 /// ```
-pub fn move_mouse_relative(x: i16, y: i16, options: OptionVec<MouseMoveRelativeOption>) -> Output {
+pub fn move_mouse_relative(
+    x: i16,
+    y: i16,
+    options: OptionVec<MouseMoveRelativeOption>,
+    display: u32,
+) -> Output {
     let c = Command::Mouse(sub_commands::Mouse::MouseMoveRelative(options));
     let args = format!("-- {} {}", x, y);
-    run(c, &args)
+    run(c, &args, display)
 }
 
 /// Send a click, that is, a [`click_down`](fn.click_down.html) followed by [`click_up`](fn.click_up.html) for the given button with a short delay between the two (currently 12ms).
@@ -95,9 +100,9 @@ pub fn move_mouse_relative(x: i16, y: i16, options: OptionVec<MouseMoveRelativeO
 ///     options::ClickOption::Repeat(2)
 /// ]);
 /// ```
-pub fn click(button: Button, options: OptionVec<ClickOption>) -> Output {
+pub fn click(button: Button, options: OptionVec<ClickOption>, display: u32) -> Output {
     let c = Command::Mouse(sub_commands::Mouse::Click(options));
-    run(c, &button.to_string())
+    run(c, &button.to_string(), display)
 }
 
 /// Same as [`click`](fn.click.html), except only a mouse down is sent.
@@ -108,9 +113,9 @@ pub fn click(button: Button, options: OptionVec<ClickOption>) -> Output {
 /// - `ClickOption::Delay(u32)` Specify how long, in milliseconds, to delay between clicks. This option is not used if the `ClickOption::Repeat` option is set to 1 (default).
 /// - `ClickOption::Window(String)` Specify a window to send a click to.
 /// - `ClickOption::ClearModifiers`
-pub fn click_down(button: Button, options: OptionVec<ClickOption>) -> Output {
+pub fn click_down(button: Button, options: OptionVec<ClickOption>, display: u32) -> Output {
     let c = Command::Mouse(sub_commands::Mouse::MouseDown(options));
-    run(c, &button.to_string())
+    run(c, &button.to_string(), display)
 }
 
 /// Same as [`click`](fn.click.html), except only a mouse up is sent.
@@ -121,9 +126,9 @@ pub fn click_down(button: Button, options: OptionVec<ClickOption>) -> Output {
 /// - `ClickOption::Delay(u32)` Specify how long, in milliseconds, to delay between clicks. This option is not used if the `ClickOption::Repeat` option is set to 1 (default).
 /// - `ClickOption::Window(String)` Specify a window to send a click to.
 /// - `ClickOption::ClearModifiers`
-pub fn click_up(button: Button, options: OptionVec<ClickOption>) -> Output {
+pub fn click_up(button: Button, options: OptionVec<ClickOption>, display: u32) -> Output {
     let c = Command::Mouse(sub_commands::Mouse::MouseUp(options));
-    run(c, &button.to_string())
+    run(c, &button.to_string(), display)
 }
 
 /// Outputs the x, y, screen, and window id of the mouse cursor. Screen numbers will be nonzero if you have multiple monitors and are not using Xinerama.
@@ -139,9 +144,9 @@ pub fn click_up(button: Button, options: OptionVec<ClickOption>) -> Output {
 /// println!("{}", String::from_utf8(output.stdout)?);
 /// # Ok::<(), std::string::FromUtf8Error>(())
 /// ```
-pub fn get_mouse_location() -> Output {
+pub fn get_mouse_location(display: u32) -> Output {
     let c = Command::Mouse(sub_commands::Mouse::GetMouseLocation);
-    run(c, "")
+    run(c, "", display)
 }
 
 /// Bind an action to events when the mouse hits the screen edge or corner.
@@ -166,16 +171,16 @@ pub fn get_mouse_location() -> Output {
 /// );
 /// ```
 
-
 // TODO: Fix the command argument. Currently it only supports commands without arguments and it's not possible to pass shell commands
 pub fn behave_screen_edge(
     screen_edge: ScreenEdge,
     cmd: Command,
     options: OptionVec<BehaveScreenEdgeOption>,
+    display: u32,
 ) -> Output {
     let bse_cmd = Command::Mouse(sub_commands::Mouse::BehaveScreenEdge(options));
     let args = format!("{} {}", screen_edge, cmd);
-    run(bse_cmd, &args)
+    run(bse_cmd, &args, display)
 }
 
 pub enum Button {

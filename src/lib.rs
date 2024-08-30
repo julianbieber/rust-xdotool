@@ -1,5 +1,5 @@
 //! A simple wrapper for the `xdotool` command line tool.
-//! 
+//!
 //! While I've tried my best documenting everything as detailed as possible, please look at the man page of `xdotool` for detailed information.
 //!
 //! # Examples
@@ -43,12 +43,13 @@ pub use optionvec::OptionVec;
 /// let output = xdotool::run(cmd, "firefox");
 /// std::io::stdout().write_all(&output.stdout).unwrap();
 /// ```
-pub fn run(command: command::Command, args: &str) -> Output {
+pub fn run(command: command::Command, args: &str, display: u32) -> Output {
     let cmd = format!("xdotool {} {}", command, args);
 
     Command::new("sh")
         .arg("-c")
         .arg(cmd)
+        .env("DISPLAY", format!(":{display}"))
         .output()
         .unwrap_or_else(|_| panic!("Failed to execute 'xdotool key {}", args))
 }
