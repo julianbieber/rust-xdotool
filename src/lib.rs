@@ -22,42 +22,42 @@ pub mod optionvec;
 pub mod window;
 
 pub use optionvec::OptionVec;
-
-/// Execute a xdotool command.
-/// This is the only function you actually need. Every other function is just for convenience.
-/// However using the convenience functions is much more straight forward and therefore more desirable.
-/// You should only use this function if there is no convenience function available.
-///
-/// # Examples
-///
-/// Search a window
-///
-/// ```
-/// use std::io::Write;
-///
-/// use xdotool::{self, option_vec, OptionVec, window};
-/// use xdotool::command::{self, options, sub_commands, Command};
-///
-/// let options = option_vec![options::SearchOption::Name];
-/// let cmd = Command::Window(sub_commands::Window::Search(options));
-/// let output = xdotool::run(cmd, "firefox");
-/// std::io::stdout().write_all(&output.stdout).unwrap();
-/// ```
-pub fn run(command: command::Command, args: &str, display: u32) -> Output {
-    let cmd = format!("xdotool {} {}", command, args);
-
-    Command::new("sh")
-        .arg("-c")
-        .arg(cmd)
-        .env("DISPLAY", format!(":{display}"))
-        .output()
-        .unwrap_or_else(|_| panic!("Failed to execute 'xdotool key {}", args))
+pub struct XServer {
+    display: u32,
+    auth: String,
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+impl XServer {
+    /// Execute a xdotool command.
+    /// This is the only function you actually need. Every other function is just for convenience.
+    /// However using the convenience functions is much more straight forward and therefore more desirable.
+    /// You should only use this function if there is no convenience function available.
+    ///
+    /// # Examples
+    ///
+    /// Search a window
+    ///
+    /// ```
+    /// use std::io::Write;
+    ///
+    /// use xdotool::{self, option_vec, OptionVec, window};
+    /// use xdotool::command::{self, options, sub_commands, Command};
+    ///
+    /// let options = option_vec![options::SearchOption::Name];
+    /// let cmd = Command::Window(sub_commands::Window::Search(options));
+    /// let output = xdotool::run(cmd, "firefox");
+    /// std::io::stdout().write_all(&output.stdout).unwrap();
+    /// ```
+    pub fn run(&self, command: command::Command, args: &str) -> Output {
+        let cmd = format!("xdotool {} {}", command, args);
+        let display = self.display;
+
+        Command::new("sh")
+            .arg("-c")
+            .arg(cmd)
+            .env("DISPLAY", format!(":{display}"))
+            .env("XAUTHORITY", self.auth.as_str())
+            .output()
+            .unwrap_or_else(|_| panic!("Failed to execute 'xdotool key {}", args))
     }
 }
