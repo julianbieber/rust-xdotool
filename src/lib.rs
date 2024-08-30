@@ -60,4 +60,14 @@ impl XServer {
             .output()
             .unwrap_or_else(|_| panic!("Failed to execute 'xdotool key {}", args))
     }
+
+    pub fn screenshot(&self) -> Output {
+        let display = self.display;
+        Command::new("xwd")
+            .env("DISPLAY", format!(":{display}"))
+            .env("XAUTHORITY", self.auth.as_str())
+            .arg("-root")
+            .output()
+            .unwrap()
+    }
 }
