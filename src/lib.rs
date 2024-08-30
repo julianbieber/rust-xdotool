@@ -23,8 +23,8 @@ pub mod window;
 
 pub use optionvec::OptionVec;
 pub struct XServer {
-    display: u32,
-    auth: String,
+    pub display: u32,
+    pub auth: String,
 }
 
 impl XServer {
